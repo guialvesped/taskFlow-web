@@ -1,5 +1,6 @@
-import TargetDialog from "@/components/TargetDialog";
+import TodoDialog from "@/components/TodoDialog";
 import { CircleCheckBig } from "lucide-react";
+import { postTodo } from "./action";
 
 export default function DashboardPage() {
   return (
@@ -8,7 +9,11 @@ export default function DashboardPage() {
         <CircleCheckBig className="text-white w-28 h-38" />
         <h1 className="text-white text-[36px]">TaskFlow</h1>
       </div>
-      <TargetDialog />
+      <TodoDialog
+        postTodo={async (data) => {
+          await postTodo(data);
+        }}
+      />
     </main>
   );
 }
