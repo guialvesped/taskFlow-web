@@ -1,10 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { createTodo } from "@/app/dashboard/action";
+import { createTodo, updateTodo } from "@/app/dashboard/action";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,17 +25,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { Textarea } from "./ui/textarea";
+import { Textarea } from "@/components/ui/textarea";
 
 const todoSchema = z.object({
   title: z.string().nonempty("O título é obrigatório"),
   todo_status: z.enum(["todo", "doing", "done"], {
     errorMap: () => ({ message: "Selecione um status" }),
   }),
-  due_date: z.date({
-    required_error: "Selecione uma data",
-  }),
+  due_date: z.date({ required_error: "Selecione uma data" }),
   priority: z.enum(["low", "medium", "high", "very high"], {
     errorMap: () => ({ message: "Selecione a prioridade" }),
   }),
@@ -46,7 +44,19 @@ const todoSchema = z.object({
 
 type TodoFormValues = z.infer<typeof todoSchema>;
 
-export default function TodoDialog() {
+interface EditTodoDialogProps {
+  todo?: {
+    id: number;
+    title: string;
+    todo_status: "todo" | "doing" | "done";
+    due_date: string;
+    priority: "low" | "medium" | "high" | "very high";
+    description?: string;
+    dificulty: "very easy" | "easy" | "medium" | "hard" | "very hard";
+  };
+}
+
+export default function EditTodoDialog({ todo }: EditTodoDialogProps) {
   const [open, setOpen] = useState(false);
 
   const form = useForm<TodoFormValues>({
@@ -56,39 +66,55 @@ export default function TodoDialog() {
       todo_status: "todo",
       priority: "low",
       description: "",
+      due_date: new Date(),
+      dificulty: "very easy",
     },
   });
+
+  useEffect(() => {
+    if (todo) {
+      form.reset({
+        title: todo.title,
+        todo_status: todo.todo_status,
+        priority: todo.priority,
+        description: todo.description || "",
+        due_date: new Date(todo.due_date),
+        dificulty: todo.dificulty,
+      });
+    }
+  }, [todo, form]);
 
   async function onSubmit(data: TodoFormValues) {
     try {
       const token = localStorage.getItem("token");
+      if (!token) throw new Error("Token não encontrado.");
 
-      if (!token) {
-        throw new Error("Token não encontrado no localStorage.");
+      if (todo?.id) {
+        await updateTodo(todo.id, data, token);
+        alert("Todo atualizado com sucesso.");
+      } else {
+        await createTodo(data, token);
+        alert("Todo criado com sucesso.");
       }
 
-      await createTodo(data, token);
       form.reset();
       setOpen(false);
     } catch (error: any) {
-      alert(
-        error?.response?.data?.error?.message ||
-          "Erro ao criar o Todo. Tente novamente."
-      );
-      console.log(error);
+      alert(error?.message || "Erro ao salvar o Todo.");
+      console.error(error);
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Criar Todo</Button>
+        <Button variant="outline">Editar Todo</Button>
       </DialogTrigger>
       <DialogContent className="min-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Novo Todo</DialogTitle>
+          <DialogTitle>Editar Todo</DialogTitle>
           <DialogDescription>
-            Insira as informações para criar um novo Todo.
+            Atualize as informações do seu Todo"
           </DialogDescription>
         </DialogHeader>
 
@@ -105,7 +131,7 @@ export default function TodoDialog() {
                   <FormItem className="flex flex-col">
                     <FormLabel className="w-1/2 text-right">Título</FormLabel>
                     <FormControl>
-                      <Input {...field} className="w-xs" />
+                      <Input {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -133,7 +159,7 @@ export default function TodoDialog() {
                         </select>
                       </div>
                     </FormControl>
-                    <FormMessage className="ml-28" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -149,21 +175,11 @@ export default function TodoDialog() {
                     <FormControl>
                       <input
                         type="date"
-                        name={field.name}
                         ref={field.ref}
-                        value={
-                          field.value
-                            ? field.value.toISOString().split("T")[0]
-                            : ""
+                        value={field.value.toISOString().split("T")[0]}
+                        onChange={(e) =>
+                          field.onChange(new Date(e.target.value))
                         }
-                        onChange={(e) => {
-                          field.onChange(
-                            e.target.value
-                              ? new Date(e.target.value)
-                              : undefined
-                          );
-                        }}
-                        onBlur={field.onBlur}
                         className="w-2/3 rounded-md border border-gray-300 bg-white p-2 text-sm shadow-sm focus:border-gray-300 focus:outline-none focus:ring-3 focus:ring-gray-300"
                       />
                     </FormControl>
@@ -171,6 +187,7 @@ export default function TodoDialog() {
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="todo_status"
@@ -179,21 +196,19 @@ export default function TodoDialog() {
                     <FormLabel className="w-1/4 text-right">Status</FormLabel>
                     <FormControl>
                       <div className="flex flex-col gap-1">
-                        <select
-                          {...field}
-                          className="w-xs rounded-md border border-gray-300 bg-white p-2 text-sm shadow-sm focus:border-gray-300 focus:outline-none focus:ring-3 focus:ring-gray-300"
-                        >
+                        <select {...field} className="input">
                           <option value="todo">Inicio</option>
                           <option value="doing">Em andamento</option>
                           <option value="done">Feito</option>
                         </select>
                       </div>
                     </FormControl>
-                    <FormMessage className="ml-28" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+
             <div className="flex flex-col gap-4 py-4">
               <FormField
                 control={form.control}
@@ -225,9 +240,6 @@ export default function TodoDialog() {
                           {...field}
                           className="w-xs rounded-md border border-gray-300 bg-white p-2 text-sm shadow-sm focus:border-gray-300 focus:outline-none focus:ring-3 focus:ring-gray-300"
                         >
-                          <option value="" disabled>
-                            Selecione a prioridade
-                          </option>
                           <option value="very easy">Muito Baixa</option>
                           <option value="easy">Baixa</option>
                           <option value="medium">Média</option>
@@ -242,7 +254,9 @@ export default function TodoDialog() {
               />
 
               <DialogFooter className="mt-4">
-                <Button type="submit">Criar Todo</Button>
+                <Button type="submit">
+                  {todo ? "Salvar Alterações" : "Criar Todo"}
+                </Button>
               </DialogFooter>
             </div>
           </form>
