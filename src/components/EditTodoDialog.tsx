@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { createTodo, updateTodo } from "@/app/dashboard/action";
+import { updateTodo } from "@/app/dashboard/action";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Todo } from "./TodoCard";
 
 const todoSchema = z.object({
   title: z.string().nonempty("O título é obrigatório"),
@@ -54,9 +55,13 @@ interface EditTodoDialogProps {
     description?: string;
     dificulty: "very easy" | "easy" | "medium" | "hard" | "very hard";
   };
+  setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
 }
 
-export default function EditTodoDialog({ todo }: EditTodoDialogProps) {
+export default function EditTodoDialog({
+  todo,
+  setTodos,
+}: EditTodoDialogProps) {
   const [open, setOpen] = useState(false);
 
   const form = useForm<TodoFormValues>({
@@ -89,13 +94,15 @@ export default function EditTodoDialog({ todo }: EditTodoDialogProps) {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Token não encontrado.");
 
-      if (todo?.id) {
-        await updateTodo(todo.id, data, token);
-        alert("Todo atualizado com sucesso.");
-      } else {
-        await createTodo(data, token);
-        alert("Todo criado com sucesso.");
+      if (!todo) {
+        throw new Error("Todo não encontrado.");
       }
+
+      const updated = await updateTodo(todo.id, data, token);
+      setTodos((prevTodos) =>
+        prevTodos.map((t) => (t.id === todo.id ? { ...t, ...updated } : t))
+      );
+      alert("Todo atualizado com sucesso.");
 
       form.reset();
       setOpen(false);

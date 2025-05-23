@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { Todo } from "./TodoCard";
 import { Textarea } from "./ui/textarea";
 
 const todoSchema = z.object({
@@ -46,7 +47,11 @@ const todoSchema = z.object({
 
 type TodoFormValues = z.infer<typeof todoSchema>;
 
-export default function TodoDialog() {
+type Props = {
+  setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
+};
+
+export default function TodoDialog({ setTodos }: Props) {
   const [open, setOpen] = useState(false);
 
   const form = useForm<TodoFormValues>({
@@ -67,7 +72,9 @@ export default function TodoDialog() {
         throw new Error("Token não encontrado no localStorage.");
       }
 
-      await createTodo(data, token);
+      const todo = await createTodo(data, token);
+      setTodos((prev: Todo[]) => [...prev, todo]);
+
       form.reset();
       setOpen(false);
     } catch (error: any) {

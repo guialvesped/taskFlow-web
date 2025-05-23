@@ -20,7 +20,6 @@ export async function getTodos(token: string) {
       Authorization: `Bearer ${token}`,
     },
   });
-  console.log(data);
 
   return data;
 }

@@ -5,7 +5,7 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
-interface Todo {
+export interface Todo {
   id: number;
   title: string;
   description?: string;
@@ -69,14 +69,13 @@ export function TodoCard({ todo, setTodos }: TodoCardProps) {
             <CardTitle className="text-xl font-semibold">
               {todo.title}
             </CardTitle>
-            <Badge className={`${statusColors[todo.todo_status]} text-white`}>
-              {todo.todo_status.toUpperCase()}
-            </Badge>
           </div>
-          <Button size="icon" onClick={deletar}>
-            <Trash2 />
-          </Button>
-          <EditTodoDialog todo={todo} />
+          <div className="flex items-center gap-2">
+            <EditTodoDialog todo={todo} setTodos={setTodos} />
+            <Button onClick={deletar} className="bg-white">
+              <Trash2 className="text-red-600" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
@@ -98,6 +97,9 @@ export function TodoCard({ todo, setTodos }: TodoCardProps) {
             {todo.dificulty.toUpperCase()}
           </span>
         </div>
+        <Badge className={`${statusColors[todo.todo_status]} text-white`}>
+          {todo.todo_status.toUpperCase()}
+        </Badge>
       </CardContent>
     </Card>
   );

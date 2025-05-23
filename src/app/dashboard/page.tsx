@@ -39,7 +39,7 @@ export default function DashboardPage() {
         <h1 className="text-white text-[36px]">TaskFlow</h1>
       </div>
 
-      <TodoDialog />
+      <TodoDialog setTodos={setTodos} />
 
       {loading ? (
         <p className="text-white mt-8">Carregando...</p>
