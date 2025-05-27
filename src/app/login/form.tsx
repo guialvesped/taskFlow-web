@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { loginAction, signUpAction } from "./action";
 
@@ -37,6 +37,7 @@ type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 export function LoginForm() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const [show, setShow] = useState(false);
 
   const form = useForm<LoginFormValues>({
@@ -48,12 +49,17 @@ export function LoginForm() {
   });
 
   async function onSubmit(data: LoginFormValues) {
+    setIsLoading(true);
     const { email, password } = data;
     const response = await loginAction({ email, password });
+
     if (response.success) {
       localStorage.setItem("token", response.token);
       router.push("/");
+      return;
     }
+    alert("Erro ao fazer login.");
+    setIsLoading(false);
   }
 
   return (
@@ -113,8 +119,8 @@ export function LoginForm() {
           )}
         />
 
-        <Button type="submit" className="mt-4">
-          Entrar
+        <Button type="submit" disabled={isLoading} className="mt-4">
+          {isLoading ? <Loader2 className="animate-spin" /> : "Entrar"}
         </Button>
       </form>
     </Form>
@@ -123,6 +129,7 @@ export function LoginForm() {
 
 export function SignUpForm() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const [show, setShow] = useState(false);
 
   const form = useForm<SignUpFormValues>({
@@ -134,6 +141,7 @@ export function SignUpForm() {
   });
 
   async function onSubmit(data: SignUpFormValues) {
+    setIsLoading(true);
     const { username, email, password } = data;
     const response = await signUpAction({ username, email, password });
 
@@ -141,6 +149,7 @@ export function SignUpForm() {
       localStorage.setItem("token", response.token);
       router.push("/");
     }
+    setIsLoading(false);
   }
 
   return (
@@ -218,8 +227,8 @@ export function SignUpForm() {
           )}
         />
 
-        <Button type="submit" className="mt-4">
-          Entrar
+        <Button type="submit" disabled={isLoading} className="mt-4">
+          {isLoading ? <Loader2 className="animate-spin" /> : "Entrar"}
         </Button>
       </form>
     </Form>

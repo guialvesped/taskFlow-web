@@ -4,7 +4,6 @@ import axios from "axios";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL;
 
-// LOGIN
 export async function loginAction({
   email,
   password,
@@ -33,7 +32,6 @@ export async function loginAction({
   }
 }
 
-// CADASTRO
 export async function signUpAction({
   username,
   email,

@@ -183,7 +183,12 @@ export default function EditTodoDialog({
                       <input
                         type="date"
                         ref={field.ref}
-                        value={field.value.toISOString().split("T")[0]}
+                        value={
+                          field.value instanceof Date &&
+                          !isNaN(field.value.getTime())
+                            ? field.value.toISOString().split("T")[0]
+                            : ""
+                        }
                         onChange={(e) =>
                           field.onChange(new Date(e.target.value))
                         }

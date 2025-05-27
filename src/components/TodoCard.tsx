@@ -33,12 +33,27 @@ const priorityColors: Record<Todo["priority"], string> = {
   "very high": "text-red-600",
 };
 
+const priorityLabel: Record<Todo["priority"], string> = {
+  low: "Baixa",
+  medium: "Média",
+  high: "Alta",
+  "very high": "Muito Alta",
+};
+
 const difficultyColors: Record<Todo["dificulty"], string> = {
   "very easy": "text-green-700",
   easy: "text-green-600",
   medium: "text-yellow-600",
   hard: "text-orange-600",
   "very hard": "text-red-600",
+};
+
+const difficultyLabel: Record<Todo["dificulty"], string> = {
+  "very easy": "Muito Baixa",
+  easy: "Baixa",
+  medium: "Média",
+  hard: "Difícil",
+  "very hard": "Muito Difícil",
 };
 
 export function TodoCard({ todo, setTodos }: TodoCardProps) {
@@ -72,7 +87,7 @@ export function TodoCard({ todo, setTodos }: TodoCardProps) {
           </div>
           <div className="flex items-center gap-2">
             <EditTodoDialog todo={todo} setTodos={setTodos} />
-            <Button onClick={deletar} className="bg-white">
+            <Button onClick={deletar} className="bg-white hover:bg-gray-100">
               <Trash2 className="text-red-600" />
             </Button>
           </div>
@@ -88,13 +103,13 @@ export function TodoCard({ todo, setTodos }: TodoCardProps) {
         <div className="text-sm">
           <strong>Prioridade:</strong>{" "}
           <span className={priorityColors[todo.priority]}>
-            {todo.priority.toUpperCase()}
+            {priorityLabel[todo.priority]}
           </span>
         </div>
         <div className="text-sm">
           <strong>Dificuldade:</strong>{" "}
           <span className={difficultyColors[todo.dificulty]}>
-            {todo.dificulty.toUpperCase()}
+            {difficultyLabel[todo.dificulty]}
           </span>
         </div>
         <Badge className={`${statusColors[todo.todo_status]} text-white`}>
