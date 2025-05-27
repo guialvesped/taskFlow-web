@@ -15,7 +15,7 @@ export default function LoginPage() {
         <button
           className={`rounded-s-md ${
             isLogin ? "bg-white text-black" : "bg-black text-white"
-          } border border-gray-300 px-3 py-1`}
+          } border border-gray-300 px-3 py-1 transition-colors duration-300`}
           onClick={() => setIsLogin(true)}
         >
           Login
@@ -23,7 +23,7 @@ export default function LoginPage() {
         <button
           className={`rounded-e-md ${
             !isLogin ? "bg-white text-black" : "bg-black text-white"
-          } border border-gray-300 border-s-0 px-3 py-1`}
+          } border border-gray-300 border-s-0 px-3 py-1 transition-colors duration-700`}
           onClick={() => setIsLogin(false)}
         >
           Registrar
